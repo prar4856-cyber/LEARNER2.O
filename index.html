@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SafeHer — Women & Child Safety</title>
+
+<!-- Cool Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+  :root {
+    --bg-primary: #0b1220;
+    --bg-secondary: #141d30;
+    --bg-card: #1a2640;
+    --text-primary: #e8edf5;
+    --text-secondary: #8b9bb4;
+    --accent-emergency: #ff3b5c;
+    --accent-trust: #3b82f6;
+    --accent-safe: #10b981;
+    --accent-warning: #f59e0b;
+    --border-subtle: #253352;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+
+  .brand { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; }
+
+  /* ===================== AUTH SCREEN ===================== */
+  #authScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: radial-gradient(circle at 20% 20%, rgba(59,130,246,0.15), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,59,92,0.12), transparent 50%),
+                var(--bg-primary);
+    position: relative;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 440px;
+    background: rgba(26, 38, 64, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 24px;
+    padding: 40px 32px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    animation: fadeInUp 0.5s ease;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .logo-badge {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-trust), var(--accent-emergency));
+    border-radius: 18px;
+    font-size: 32px;
+    box-shadow: 0 10px 30px rgba(59,130,246,0.4);
+  }
+
+  .auth-title {
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, #fff, #8b9bb4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .auth-subtitle {
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  .tabs {
+    display: flex;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .tab.active {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .form-group { margin-bottom: 16px; }
+
+  .form-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    outline: none;
+  }
+
+  .form-input:focus {
+    border-color: var(--accent-trust);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+
+  .form-input::placeholder { color: #5a6b85; }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent-trust), #2563eb);
+    color: white;
+    box-shadow: 0 8px 20px rgba(59,130,246,0.3);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(59,130,246,0.45);
+  }
+
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .alert-error {
+    background: rgba(255,59,92,0.1);
+    border: 1px solid rgba(255,59,92,0.4);
+    color: #ff8ba0;
+  }
+
+  .alert-success {
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.4);
+    color: #6ee7b7;
+  }
+
+  .alert.show { display: block; }
+
+  /* ===================== DASHBOARD ===================== */
+  #dashboardScreen { display: none; min-height: 100vh; }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: rgba(20, 29, 48, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.08em;
+  }
+
+  .topbar-brand .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent-safe);
+    box-shadow: 0 0 12px var(--accent-safe);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px 6px 6px;
+    background: var(--bg-card);
+    border-radius: 100px;
+    border: 1px solid var(--border-subtle);
+    font-size: 13px;
+  }
+
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-trust), var(--accent-emergency));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+  }
+
+  .logout-btn {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .logout-btn:hover {
+    border-color: var(--accent-emergency);
+    color: var(--accent-emergency);
+  }
+
+  .dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  .hero { text-align: center; margin-bottom: 40px; }
+
+  .hero h1 {
+    font-size: 40px;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #fff, #8b9bb4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero p { color: var(--text-secondary); font-size: 15px; }
+
+  /* SOS SECTION */
+  .sos-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 40px 0 56px;
+  }
+
+  .sos-btn {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ff6b85, var(--accent-emergency) 60%);
+    border: none;
+    color: white;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    box-shadow: 0 0 0 0 rgba(255,59,92,0.7),
+                0 20px 50px rgba(255,59,92,0.4);
+    user-select: none;
+    animation: sosPulse 2.4s infinite;
+  }
+
+  @keyframes sosPulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,59,92,0.7), 0 20px 50px rgba(255,59,92,0.4); }
+    70% { box-shadow: 0 0 0 30px rgba(255,59,92,0), 0 20px 50px rgba(255,59,92,0.4); }
+    100% { box-shadow: 0 0 0 0 rgba(255,59,92,0), 0 20px 50px rgba(255,59,92,0.4); }
+  }
+
+  .sos-btn:active { transform: scale(0.96); }
+
+  .sos-hint {
+    margin-top: 16px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+  }
+
+  /* FEATURES GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    padding: 24px;
+    transition: all 0.25s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(59,130,246,0.08));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(59,130,246,0.5);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  .card-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 16px;
+    background: rgba(59,130,246,0.15);
+    border: 1px solid rgba(59,130,246,0.3);
+  }
+
+  .card-icon.red { background: rgba(255,59,92,0.15); border-color: rgba(255,59,92,0.3); }
+  .card-icon.green { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.3); }
+  .card-icon.yellow { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); }
+
+  .card h3 {
+    font-size: 17px;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+  }
+
+  .card p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ===================== VIDEO CALL SCREEN ===================== */
+  #callScreen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 999;
+  }
+
+  #remoteVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #111;
+  }
+
+  #localVideo {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 200px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 2px solid rgba(255,255,255,0.15);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    background: #222;
+    z-index: 10;
+  }
+
+  .call-badge {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(11,18,32,0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent-warning);
+    animation: pulse 1.5s infinite;
+  }
+
+  .status-dot.connected { background: var(--accent-safe); animation: none; }
+  .status-dot.ended { background: var(--accent-emergency); animation: none; }
+
+  .call-controls {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
+    padding: 12px;
+    background: rgba(11,18,32,0.85);
+    backdrop-filter: blur(20px);
+    border-radius: 100px;
+    border: 1px solid var(--border-subtle);
+    z-index: 10;
+  }
+
+  .ctrl-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  .ctrl-btn:hover { transform: scale(1.08); }
+  .ctrl-btn.active { background: var(--accent-emergency); }
+  .ctrl-btn.end { background: var(--accent-emergency); padding: 0 28px; width: auto; border-radius: 100px; gap: 8px; font-size: 15px; font-weight: 600; color: white; }
+  .ctrl-btn.end:hover { background: #e11d48; }
+
+  /* ===================== MODAL ===================== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 20px;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 28px;
+    max-width: 420px;
+    width: 100%;
+    animation: fadeInUp 0.3s ease;
+  }
+
+  .modal h2 { font-size: 22px; margin-bottom: 8px; }
+  .modal p { color: var(--text-secondary); font-size: 14px; margin-bottom: 20px; line-height: 1.6; }
+
+  .modal-input {
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    margin-bottom: 16px;
+  }
+
+  .modal-input:focus { border-color: var(--accent-trust); }
+
+  .modal-actions { display: flex; gap: 10px; }
+
+  .btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .btn-secondary:hover { background: #1f2a44; }
+
+  .btn-danger {
+    background: var(--accent-emergency);
+    color: white;
+  }
+
+  .btn-danger:hover { background: #e11d48; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    padding: 14px 22px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    font-size: 14px;
+    z-index: 2000;
+    transition: transform 0.3s ease;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { border-color: rgba(255,59,92,0.5); }
+  .toast.success { border-color: rgba(16,185,129,0.5); }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 28px; }
+    .sos-btn { width: 170px; height: 170px; font-size: 34px; }
+    #localVideo { width: 110px; height: 82px; }
+    .user-chip span { display: none; }
+    .auth-card { padding: 32px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ AUTH SCREEN ============ -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="logo-badge">🛡️</div>
+    <h1 class="auth-title brand">SafeHer</h1>
+    <p class="auth-subtitle">Your safety network, always on.</p>
+
+    <div class="tabs">
+      <button class="tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+      <button class="tab" id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <div id="authAlert" class="alert alert-error"></div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
+    </form>
+
+    <!-- SIGNUP FORM -->
+    <form id="signupForm" onsubmit="handleSignup(event)" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="signupName" placeholder="Your name" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="signupEmail" placeholder="you@example.com" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password (min 6 characters)</label>
+        <input type="password" class="form-input" id="signupPassword" placeholder="••••••••" minlength="6" required />
+      </div>
+      <button type="submit" class="btn btn-primary" id="signupBtn">Create Account</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dashboardScreen">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <span>🛡️ SAFEHER</span>
+      <span class="dot"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="user-chip">
+        <div class="avatar" id="userAvatar">U</div>
+        <span id="userEmail">user@example.com</span>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="dashboard">
+    <div class="hero">
+      <h1>Welcome back, <span id="userName">Friend</span></h1>
+      <p>You are protected. Stay safe, stay aware.</p>
+    </div>
+
+    <div class="sos-section">
+      <button class="sos-btn" onclick="triggerSOS()">SOS</button>
+      <div class="sos-hint">TAP FOR EMERGENCY ALERT</div>
+    </div>
+
+    <div class="grid">
+      <div class="card" onclick="openCallModal()">
+        <div class="card-icon green">📞</div>
+        <h3>Video Call Guardian</h3>
+        <p>Start a secure WebRTC call with your trusted contact in real time.</p>
+      </div>
+
+      <div class="card" onclick="shareLocation()">
+        <div class="card-icon">📍</div>
+        <h3>Share Live Location</h3>
+        <p>Send your real-time GPS location to your emergency circle.</p>
+      </div>
+
+      <div class="card" onclick="showToast('Contacts feature coming soon', 'success')">
+        <div class="card-icon yellow">👥</div>
+        <h3>Trusted Contacts</h3>
+        <p>Manage your safety circle — family and friends who get alerts.</p>
+      </div>
+
+      <div class="card" onclick="showToast('Report feature coming soon', 'success')">
+        <div class="card-icon red">📝</div>
+        <h3>Report Incident</h3>
+        <p>File a confidential report with photo, audio and video evidence.</p>
+      </div>
+
+      <div class="card" onclick="startVoiceGuard()">
+        <div class="card-icon green">🎙️</div>
+        <h3>Voice Guard</h3>
+        <p>Say "help" to trigger hands-free emergency alert automatically.</p>
+      </div>
+
+      <div class="card" onclick="showToast('Nearby help centers: 3 found', 'success')">
+        <div class="card-icon yellow">🏥</div>
+        <h3>Nearby Help</h3>
+        <p>Find closest police stations, hospitals and safe zones.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ VIDEO CALL SCREEN ============ -->
+<div id="callScreen">
+  <video id="remoteVideo" autoplay playsinline></video>
+  <video id="localVideo" autoplay playsinline muted></video>
+
+  <div class="call-badge">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="callStatus">Connecting...</span>
+  </div>
+
+  <div class="call-controls">
+    <button class="ctrl-btn" id="muteBtn" onclick="toggleMute()" title="Mute">🎤</button>
+    <button class="ctrl-btn end" onclick="endCall()">📞 End Call</button>
+    <button class="ctrl-btn" id="camBtn" onclick="toggleCamera()" title="Camera">📹</button>
+  </div>
+</div>
+
+<!-- ============ CALL MODAL ============ -->
+<div class="modal-overlay" id="callModal">
+  <div class="modal">
+    <h2>Start Video Call</h2>
+    <p>Enter a room ID. Share this ID with your trusted contact so they can join the same call.</p>
+    <input type="text" class="modal-input" id="roomIdInput" placeholder="e.g. safe-1234" />
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeCallModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="startCall()">Start Call</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   1. SUPABASE CONFIG — REPLACE WITH YOUR OWN CREDENTIALS
+   ============================================================ */
+const SUPABASE_URL = 'https://YOUR-PROJECT-ID.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
+
+let supabaseClient = null;
+let currentUser = null;
+
+/* ============================================================
+   2. INIT
+   ============================================================ */
+window.addEventListener('DOMContentLoaded', async () => {
+  if (SUPABASE_URL.includes('YOUR-PROJECT-ID')) {
+    showAlert('Please set your Supabase URL and anon key in the script.', 'error');
+    return;
+  }
+
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Check existing session
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    showDashboard();
+  }
+
+  // Listen for auth changes
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    if (session) {
+      currentUser = session.user;
+      showDashboard();
+    } else {
+      currentUser = null;
+      showAuth();
+    }
+  });
+});
+
+/* ============================================================
+   3. UI HELPERS
+   ============================================================ */
+function switchTab(tab) {
+  document.getElementById('authAlert').classList.remove('show');
+  if (tab === 'login') {
+    document.getElementById('tabLogin').classList.add('active');
+    document.getElementById('tabSignup').classList.remove('active');
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('signupForm').style.display = 'none';
+  } else {
+    document.getElementById('tabSignup').classList.add('active');
+    document.getElementById('tabLogin').classList.remove('active');
+    document.getElementById('signupForm').style.display = 'block';
+    document.getElementById('loginForm').style.display = 'none';
+  }
+}
+
+function showAlert(msg, type = 'error') {
+  const el = document.getElementById('authAlert');
+  el.className = 'alert alert-' + type + ' show';
+  el.textContent = msg;
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function showAuth() {
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('dashboardScreen').style.display = 'none';
+}
+
+function showDashboard() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('dashboardScreen').style.display = 'block';
+
+  const email = currentUser?.email || 'user@example.com';
+  const name = email.split('@')[0];
+  document.getElementById('userEmail').textContent = email;
+  document.getElementById('userName').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+}
+
+/* ============================================================
+   4. AUTH FUNCTIONS
+   ============================================================ */
+async function handleLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  btn.disabled = false;
+  btn.textContent = 'Sign In';
+
+  if (error) {
+    showAlert(error.message, 'error');
+    return;
+  }
+
+  currentUser = data.user;
+  showToast('Welcome back!', 'success');
+  showDashboard();
+}
+
+async function handleSignup(e) {
+  e.preventDefault();
+  const btn = document.getElementById('signupBtn');
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: { data: { full_name: name } }
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Create Account';
+
+  if (error) {
+    showAlert(error.message, 'error');
+    return;
+  }
+
+  if (data.user && !data.session) {
+    showAlert('Account created! Check your email to confirm before signing in.', 'success');
+    switchTab('login');
+  } else {
+    currentUser = data.user;
+    showToast('Account created!', 'success');
+    showDashboard();
+  }
+}
+
+async function handleLogout() {
+  await supabaseClient.auth.signOut();
+  showToast('Signed out', 'success');
+}
+
+/* ============================================================
+   5. SOS & SAFETY FEATURES
+   ============================================================ */
+function triggerSOS() {
+  if (!navigator.geolocation) {
+    showToast('Geolocation not supported', 'error');
+    return;
+  }
+
+  showToast('🚨 SOS Triggered! Getting your location...', 'error');
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords;
+      const mapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
+      console.log('SOS Location:', mapsLink);
+      showToast('Alert sent to trusted contacts!', 'error');
+      // TODO: Insert into Supabase 'alerts' table
+    },
+    (err) => {
+      showToast('Could not get location: ' + err.message, 'error');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+function shareLocation() {
+  if (!navigator.geolocation) {
+    showToast('Geolocation not supported', 'error');
+    return;
+  }
+  showToast('Getting location...', 'success');
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords;
+      const link = `https://maps.google.com/?q=${latitude},${longitude}`;
+      navigator.clipboard.writeText(link);
+      showToast('Location copied to clipboard!', 'success');
+    },
+    (err) => showToast('Location error: ' + err.message, 'error'),
+    { enableHighAccuracy: true }
+  );
+}
+
+let voiceRecognition = null;
+function startVoiceGuard() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showToast('Voice recognition not supported in this browser', 'error');
+    return;
+  }
+  if (voiceRecognition) {
+    voiceRecognition.stop();
+    voiceRecognition = null;
+    showToast('Voice Guard stopped', 'success');
+    return;
+  }
+
+  voiceRecognition = new SpeechRecognition();
+  voiceRecognition.continuous = true;
+  voiceRecognition.interimResults = true;
+  voiceRecognition.lang = 'en-US';
+
+  voiceRecognition.onresult = (event) => {
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript.toLowerCase();
+      if (transcript.includes('help') || transcript.includes('bachao') || transcript.includes('madad')) {
+        triggerSOS();
+        voiceRecognition.stop();
+        voiceRecognition = null;
+        return;
+      }
+    }
+  };
+
+  voiceRecognition.onerror = (e) => {
+    console.error('Voice error', e);
+  };
+
+  voiceRecognition.start();
+  showToast('🎙️ Voice Guard active. Say "help" for SOS.', 'success');
+}
+
+/* ============================================================
+   6. WEBRTC VIDEO CALLING
+   ============================================================ */
+let peerConnection = null;
+let localStream = null;
+let realtimeChannel = null;
+let isMuted = false;
+let isCamOff = false;
+
+const ICE_SERVERS = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:global.stun.twilio.com:3478' }
+  ]
+};
+
+function openCallModal() {
+  document.getElementById('callModal').classList.add('show');
+  // Pre-fill a random room ID for convenience
+  document.getElementById('roomIdInput').value = 'safe-' + Math.floor(1000 + Math.random() * 9000);
+}
+
+function closeCallModal() {
+  document.getElementById('callModal').classList.remove('show');
+}
+
+function updateCallStatus(text, state) {
+  document.getElementById('callStatus').textContent = text;
+  const dot = document.getElementById('statusDot');
+  dot.className = 'status-dot' + (state ? ' ' + state : '');
+}
+
+async function startCall() {
+  const roomId = document.getElementById('roomIdInput').value.trim();
+  if (!roomId) {
+    showToast('Please enter a room ID', 'error');
+    return;
+  }
+  closeCallModal();
+
+  document.getElementById('callScreen').style.display = 'block';
+  updateCallStatus('Connecting...', '');
+
+  try {
+    // 1. Get user media
+    localStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 1280, height: 720 },
+      audio: true
+    });
+    document.getElementById('localVideo').srcObject = localStream;
+
+    // 2. Create peer connection
+    peerConnection = new RTCPeerConnection(ICE_SERVERS);
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    // 3. Handle remote stream
+    const remoteStream = new MediaStream();
+    document.getElementById('remoteVideo').srcObject = remoteStream;
+
+    peerConnection.ontrack = (event) => {
+      event.streams[0].getTracks().forEach(track => {
+        if (!remoteStream.getTracks().includes(track)) {
+          remoteStream.addTrack(track);
+        }
+      });
+      updateCallStatus('Connected', 'connected');
+    };
+
+    // 4. Send ICE candidates via Supabase Realtime
+    peerConnection.onicecandidate = (event) => {
+      if (event.candidate && realtimeChannel) {
+        realtimeChannel.send({
+          type: 'broadcast',
+          event: 'ice-candidate',
+          payload: { candidate: event.candidate, from: currentUser.id }
+        });
+      }
+    };
+
+    peerConnection.onconnectionstatechange = () => {
+      const state = peerConnection.connectionState;
+      console.log('Connection state:', state);
+      if (state === 'connected') updateCallStatus('Connected', 'connected');
+      if (state === 'disconnected' || state === 'failed') {
+        updateCallStatus('Disconnected', 'ended');
+        setTimeout(endCall, 1500);
+      }
+    };
+
+    // 5. Join Supabase Realtime channel for signaling
+    realtimeChannel = supabaseClient.channel('room-' + roomId, {
+      config: { broadcast: { self: false } }
+    });
+
+    realtimeChannel
+      .on('broadcast', { event: 'offer' }, async ({ payload }) => {
+        if (payload.from === currentUser.id) return;
+        console.log('Received offer');
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        realtimeChannel.send({
+          type: 'broadcast',
+          event: 'answer',
+          payload: { sdp: answer, from: currentUser.id }
+        });
+      })
+      .on('broadcast', { event: 'answer' }, async ({ payload }) => {
+        if (payload.from === currentUser.id) return;
+        console.log('Received answer');
+        if (peerConnection.signalingState !== 'stable') {
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+        }
+      })
+      .on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
+        if (payload.from === currentUser.id) return;
+        try {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(payload.candidate));
+        } catch (e) {
+          console.warn('ICE add failed:', e);
+        }
+      })
+      .on('broadcast', { event: 'end-call' }, () => {
+        console.log('Remote ended call');
+        updateCallStatus('Call Ended', 'ended');
+        setTimeout(() => endCall(true), 1000);
+      })
+      .on('broadcast', { event: 'peer-joined' }, async ({ payload }) => {
+        if (payload.from === currentUser.id) return;
+        console.log('Peer joined, sending offer');
+        // We are the caller — create offer
+        if (peerConnection.signalingState === 'stable') {
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+          realtimeChannel.send({
+            type: 'broadcast',
+            event: 'offer',
+            payload: { sdp: offer, from: currentUser.id }
+          });
+        }
+      })
+      .subscribe(async (status) => {
+        console.log('Realtime status:', status);
+        if (status === 'SUBSCRIBED') {
+          // Notify others we joined
+          await realtimeChannel.send({
+            type: 'broadcast',
+            event: 'peer-joined',
+            payload: { from: currentUser.id }
+          });
+        }
+      });
+
+  } catch (err) {
+    console.error('Call error:', err);
+    showToast('Failed to start call: ' + err.message, 'error');
+    document.getElementById('callScreen').style.display = 'none';
+  }
+}
+
+function toggleMute() {
+  if (!localStream) return;
+  const audio = localStream.getAudioTracks()[0];
+  if (audio) {
+    audio.enabled = !audio.enabled;
+    isMuted = !audio.enabled;
+    document.getElementById('muteBtn').classList.toggle('active', isMuted);
+    document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🎤';
+  }
+}
+
+function toggleCamera() {
+  if (!localStream) return;
+  const video = localStream.getVideoTracks()[0];
+  if (video) {
+    video.enabled = !video.enabled;
+    isCamOff = !video.enabled;
+    document.getElementById('camBtn').classList.toggle('active', isCamOff);
+    document.getElementById('camBtn').textContent = isCamOff ? '🚫' : '📹';
+  }
+}
+
+function endCall(remote = false) {
+  if (!remote && realtimeChannel) {
+    realtimeChannel.send({
+      type: 'broadcast',
+      event: 'end-call',
+      payload: { from: currentUser.id }
+    });
+  }
+
+  if (localStream) {
+    localStream.getTracks().forEach(t => t.stop());
+    localStream = null;
+  }
+  if (peerConnection) {
+    peerConnection.close();
+    peerConnection = null;
+  }
+  if (realtimeChannel) {
+    realtimeChannel.unsubscribe();
+    realtimeChannel = null;
+  }
+
+  document.getElementById('localVideo').srcObject = null;
+  document.getElementById('remoteVideo').srcObject = null;
+  document.getElementById('callScreen').style.display = 'none';
+
+  isMuted = false;
+  isCamOff = false;
+  document.getElementById('muteBtn').classList.remove('active');
+  document.getElementById('camBtn').classList.remove('active');
+  document.getElementById('muteBtn').textContent = '🎤';
+  document.getElementById('camBtn').textContent = '📹';
+
+  showToast('Call ended', 'success');
+}
+</script>
+</body>
+</html>
