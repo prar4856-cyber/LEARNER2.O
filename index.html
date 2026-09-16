@@ -38,7 +38,6 @@
   }
 
   h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
-
   .brand { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; }
 
   /* ===================== AUTH SCREEN ===================== */
@@ -51,7 +50,6 @@
     background: radial-gradient(circle at 20% 20%, rgba(59,130,246,0.15), transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(255,59,92,0.12), transparent 50%),
                 var(--bg-primary);
-    position: relative;
   }
 
   .auth-card {
@@ -73,12 +71,9 @@
   }
 
   .logo-badge {
-    width: 64px;
-    height: 64px;
+    width: 64px; height: 64px;
     margin: 0 auto 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     background: linear-gradient(135deg, var(--accent-trust), var(--accent-emergency));
     border-radius: 18px;
     font-size: 32px;
@@ -110,8 +105,7 @@
   }
 
   .tab {
-    flex: 1;
-    padding: 10px;
+    flex: 1; padding: 10px;
     text-align: center;
     border-radius: 9px;
     cursor: pointer;
@@ -301,7 +295,6 @@
 
   .hero p { color: var(--text-secondary); font-size: 15px; }
 
-  /* SOS SECTION */
   .sos-section {
     display: flex;
     flex-direction: column;
@@ -343,7 +336,6 @@
     letter-spacing: 0.05em;
   }
 
-  /* FEATURES GRID */
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -381,9 +373,7 @@
   .card-icon {
     width: 48px; height: 48px;
     border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-size: 24px;
     margin-bottom: 16px;
     background: rgba(59,130,246,0.15);
@@ -394,19 +384,10 @@
   .card-icon.green { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.3); }
   .card-icon.yellow { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); }
 
-  .card h3 {
-    font-size: 17px;
-    margin-bottom: 6px;
-    color: var(--text-primary);
-  }
+  .card h3 { font-size: 17px; margin-bottom: 6px; }
+  .card p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
 
-  .card p {
-    font-size: 13px;
-    color: var(--text-secondary);
-    line-height: 1.5;
-  }
-
-  /* ===================== VIDEO CALL SCREEN ===================== */
+  /* ===================== VIDEO CALL ===================== */
   #callScreen {
     display: none;
     position: fixed;
@@ -416,18 +397,15 @@
   }
 
   #remoteVideo {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     object-fit: cover;
     background: #111;
   }
 
   #localVideo {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 200px;
-    height: 140px;
+    top: 20px; right: 20px;
+    width: 200px; height: 140px;
     object-fit: cover;
     border-radius: 16px;
     border: 2px solid rgba(255,255,255,0.15);
@@ -438,8 +416,7 @@
 
   .call-badge {
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: 20px; left: 20px;
     padding: 8px 16px;
     border-radius: 100px;
     font-size: 13px;
@@ -479,13 +456,10 @@
   }
 
   .ctrl-btn {
-    width: 56px;
-    height: 56px;
+    width: 56px; height: 56px;
     border-radius: 50%;
     border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-size: 22px;
     cursor: pointer;
     transition: all 0.2s;
@@ -495,7 +469,16 @@
 
   .ctrl-btn:hover { transform: scale(1.08); }
   .ctrl-btn.active { background: var(--accent-emergency); }
-  .ctrl-btn.end { background: var(--accent-emergency); padding: 0 28px; width: auto; border-radius: 100px; gap: 8px; font-size: 15px; font-weight: 600; color: white; }
+  .ctrl-btn.end {
+    background: var(--accent-emergency);
+    padding: 0 28px;
+    width: auto;
+    border-radius: 100px;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+  }
   .ctrl-btn.end:hover { background: #e11d48; }
 
   /* ===================== MODAL ===================== */
@@ -551,14 +534,6 @@
 
   .btn-secondary:hover { background: #1f2a44; }
 
-  .btn-danger {
-    background: var(--accent-emergency);
-    color: white;
-  }
-
-  .btn-danger:hover { background: #e11d48; }
-
-  /* TOAST */
   .toast {
     position: fixed;
     top: 24px;
@@ -606,7 +581,6 @@
 
     <div id="authAlert" class="alert alert-error"></div>
 
-    <!-- LOGIN FORM -->
     <form id="loginForm" onsubmit="handleLogin(event)">
       <div class="form-group">
         <label class="form-label">Email Address</label>
@@ -619,7 +593,6 @@
       <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
     </form>
 
-    <!-- SIGNUP FORM -->
     <form id="signupForm" onsubmit="handleSignup(event)" style="display:none;">
       <div class="form-group">
         <label class="form-label">Full Name</label>
@@ -696,10 +669,10 @@
         <p>Say "help" to trigger hands-free emergency alert automatically.</p>
       </div>
 
-      <div class="card" onclick="showToast('Nearby help centers: 3 found', 'success')">
-        <div class="card-icon yellow">🏥</div>
-        <h3>Nearby Help</h3>
-        <p>Find closest police stations, hospitals and safe zones.</p>
+      <div class="card" onclick="loadAlertHistory()">
+        <div class="card-icon yellow">📊</div>
+        <h3>Alert History</h3>
+        <p>View your past SOS alerts and location records.</p>
       </div>
     </div>
   </div>
@@ -740,46 +713,44 @@
 
 <script>
 /* ============================================================
-   1. SUPABASE CONFIG — REPLACE WITH YOUR OWN CREDENTIALS
+   SUPABASE CONFIG — YOUR CREDENTIALS
    ============================================================ */
-const SUPABASE_URL = 'https://YOUR-PROJECT-ID.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
+const SUPABASE_URL = 'https://alupohqgznnqhialfnlq.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_dXxjrFYYmbq2DGZxWkFnNg_1EM6Xtr7';
 
 let supabaseClient = null;
 let currentUser = null;
 
 /* ============================================================
-   2. INIT
+   INIT
    ============================================================ */
 window.addEventListener('DOMContentLoaded', async () => {
-  if (SUPABASE_URL.includes('YOUR-PROJECT-ID')) {
-    showAlert('Please set your Supabase URL and anon key in the script.', 'error');
-    return;
-  }
+  try {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // Check existing session
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    showDashboard();
-  }
-
-  // Listen for auth changes
-  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
       currentUser = session.user;
       showDashboard();
-    } else {
-      currentUser = null;
-      showAuth();
     }
-  });
+
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        currentUser = session.user;
+        showDashboard();
+      } else {
+        currentUser = null;
+        showAuth();
+      }
+    });
+  } catch (err) {
+    console.error('Init error:', err);
+    showAlert('Failed to initialize Supabase: ' + err.message, 'error');
+  }
 });
 
 /* ============================================================
-   3. UI HELPERS
+   UI HELPERS
    ============================================================ */
 function switchTab(tab) {
   document.getElementById('authAlert').classList.remove('show');
@@ -819,14 +790,16 @@ function showDashboard() {
   document.getElementById('dashboardScreen').style.display = 'block';
 
   const email = currentUser?.email || 'user@example.com';
-  const name = email.split('@')[0];
+  const meta = currentUser?.user_metadata || {};
+  const name = meta.full_name || email.split('@')[0];
+
   document.getElementById('userEmail').textContent = email;
   document.getElementById('userName').textContent = name.charAt(0).toUpperCase() + name.slice(1);
   document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
 }
 
 /* ============================================================
-   4. AUTH FUNCTIONS
+   AUTH FUNCTIONS
    ============================================================ */
 async function handleLogin(e) {
   e.preventDefault();
@@ -877,7 +850,7 @@ async function handleSignup(e) {
   }
 
   if (data.user && !data.session) {
-    showAlert('Account created! Check your email to confirm before signing in.', 'success');
+    showAlert('✅ Account created! Check your email to confirm, then sign in.', 'success');
     switchTab('login');
   } else {
     currentUser = data.user;
@@ -892,9 +865,9 @@ async function handleLogout() {
 }
 
 /* ============================================================
-   5. SOS & SAFETY FEATURES
+   SOS & SAFETY FEATURES
    ============================================================ */
-function triggerSOS() {
+async function triggerSOS() {
   if (!navigator.geolocation) {
     showToast('Geolocation not supported', 'error');
     return;
@@ -903,12 +876,26 @@ function triggerSOS() {
   showToast('🚨 SOS Triggered! Getting your location...', 'error');
 
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
+    async (pos) => {
       const { latitude, longitude } = pos.coords;
-      const mapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
-      console.log('SOS Location:', mapsLink);
-      showToast('Alert sent to trusted contacts!', 'error');
-      // TODO: Insert into Supabase 'alerts' table
+
+      // Save to Supabase
+      if (currentUser && supabaseClient) {
+        const { error } = await supabaseClient.from('alerts').insert({
+          user_id: currentUser.id,
+          latitude,
+          longitude,
+          status: 'active',
+          message: 'SOS emergency alert triggered'
+        });
+
+        if (error) {
+          console.error('Save error:', error);
+          showToast('Alert saved locally. DB error: ' + error.message, 'error');
+        } else {
+          showToast('🚨 SOS alert sent to your trusted contacts!', 'error');
+        }
+      }
     },
     (err) => {
       showToast('Could not get location: ' + err.message, 'error');
@@ -924,11 +911,26 @@ function shareLocation() {
   }
   showToast('Getting location...', 'success');
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
+    async (pos) => {
       const { latitude, longitude } = pos.coords;
       const link = `https://maps.google.com/?q=${latitude},${longitude}`;
-      navigator.clipboard.writeText(link);
-      showToast('Location copied to clipboard!', 'success');
+
+      try {
+        await navigator.clipboard.writeText(link);
+        showToast('📍 Location copied to clipboard!', 'success');
+      } catch (e) {
+        showToast('Location: ' + link, 'success');
+      }
+
+      // Also log to DB
+      if (currentUser && supabaseClient) {
+        await supabaseClient.from('location_shares').insert({
+          user_id: currentUser.id,
+          latitude,
+          longitude,
+          share_link: link
+        });
+      }
     },
     (err) => showToast('Location error: ' + err.message, 'error'),
     { enableHighAccuracy: true }
@@ -966,22 +968,44 @@ function startVoiceGuard() {
     }
   };
 
-  voiceRecognition.onerror = (e) => {
-    console.error('Voice error', e);
-  };
-
+  voiceRecognition.onerror = (e) => console.error('Voice error', e);
   voiceRecognition.start();
   showToast('🎙️ Voice Guard active. Say "help" for SOS.', 'success');
 }
 
+async function loadAlertHistory() {
+  if (!currentUser || !supabaseClient) return;
+
+  const { data, error } = await supabaseClient
+    .from('alerts')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  if (error) {
+    showToast('Could not load alerts: ' + error.message, 'error');
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    showToast('No alerts yet — you are safe!', 'success');
+    return;
+  }
+
+  const latest = data[0];
+  showToast(`Last alert: ${new Date(latest.created_at).toLocaleString()}`, 'success');
+}
+
 /* ============================================================
-   6. WEBRTC VIDEO CALLING
+   WEBRTC VIDEO CALLING
    ============================================================ */
 let peerConnection = null;
 let localStream = null;
 let realtimeChannel = null;
 let isMuted = false;
 let isCamOff = false;
+let currentRoomId = null;
 
 const ICE_SERVERS = {
   iceServers: [
@@ -993,7 +1017,6 @@ const ICE_SERVERS = {
 
 function openCallModal() {
   document.getElementById('callModal').classList.add('show');
-  // Pre-fill a random room ID for convenience
   document.getElementById('roomIdInput').value = 'safe-' + Math.floor(1000 + Math.random() * 9000);
 }
 
@@ -1003,8 +1026,7 @@ function closeCallModal() {
 
 function updateCallStatus(text, state) {
   document.getElementById('callStatus').textContent = text;
-  const dot = document.getElementById('statusDot');
-  dot.className = 'status-dot' + (state ? ' ' + state : '');
+  document.getElementById('statusDot').className = 'status-dot' + (state ? ' ' + state : '');
 }
 
 async function startCall() {
@@ -1013,24 +1035,22 @@ async function startCall() {
     showToast('Please enter a room ID', 'error');
     return;
   }
+  currentRoomId = roomId;
   closeCallModal();
 
   document.getElementById('callScreen').style.display = 'block';
   updateCallStatus('Connecting...', '');
 
   try {
-    // 1. Get user media
     localStream = await navigator.mediaDevices.getUserMedia({
       video: { width: 1280, height: 720 },
       audio: true
     });
     document.getElementById('localVideo').srcObject = localStream;
 
-    // 2. Create peer connection
     peerConnection = new RTCPeerConnection(ICE_SERVERS);
     localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
-    // 3. Handle remote stream
     const remoteStream = new MediaStream();
     document.getElementById('remoteVideo').srcObject = remoteStream;
 
@@ -1043,7 +1063,6 @@ async function startCall() {
       updateCallStatus('Connected', 'connected');
     };
 
-    // 4. Send ICE candidates via Supabase Realtime
     peerConnection.onicecandidate = (event) => {
       if (event.candidate && realtimeChannel) {
         realtimeChannel.send({
@@ -1060,11 +1079,10 @@ async function startCall() {
       if (state === 'connected') updateCallStatus('Connected', 'connected');
       if (state === 'disconnected' || state === 'failed') {
         updateCallStatus('Disconnected', 'ended');
-        setTimeout(endCall, 1500);
+        setTimeout(() => endCall(true), 1500);
       }
     };
 
-    // 5. Join Supabase Realtime channel for signaling
     realtimeChannel = supabaseClient.channel('room-' + roomId, {
       config: { broadcast: { self: false } }
     });
@@ -1098,14 +1116,12 @@ async function startCall() {
         }
       })
       .on('broadcast', { event: 'end-call' }, () => {
-        console.log('Remote ended call');
         updateCallStatus('Call Ended', 'ended');
         setTimeout(() => endCall(true), 1000);
       })
       .on('broadcast', { event: 'peer-joined' }, async ({ payload }) => {
         if (payload.from === currentUser.id) return;
         console.log('Peer joined, sending offer');
-        // We are the caller — create offer
         if (peerConnection.signalingState === 'stable') {
           const offer = await peerConnection.createOffer();
           await peerConnection.setLocalDescription(offer);
@@ -1119,7 +1135,6 @@ async function startCall() {
       .subscribe(async (status) => {
         console.log('Realtime status:', status);
         if (status === 'SUBSCRIBED') {
-          // Notify others we joined
           await realtimeChannel.send({
             type: 'broadcast',
             event: 'peer-joined',
