@@ -875,6 +875,41 @@ const CONSOLE_HOOK = '<scr' + 'ipt>' + `
 })();
 ` + '</scr' + 'ipt>';
 
+/* Ye script rok deta hai ki generated site ke andar koi button/link/form
+   submit hokar wapas CodePlayground ke asli URL par navigate kar de
+   (kyunki srcdoc/popup ka "base URL" CodePlayground ka hi hota hai).
+   - "#id" wale links smooth-scroll karte hai, navigate nahi.
+   - Real http(s)/mailto/tel links naye tab mein khulte hai (safe).
+   - Baaki sab (relative/empty href, form submit) yahin rok diya jaata hai. */
+const NAV_GUARD = '<scr' + 'ipt>' + `
+(function(){
+  document.addEventListener('click', function(e){
+    var a = e.target && e.target.closest ? e.target.closest('a') : null;
+    if (!a) return;
+    var href = a.getAttribute('href');
+    if (href == null || href === '') { e.preventDefault(); return; }
+    if (href.charAt(0) === '#'){
+      e.preventDefault();
+      var id = href.slice(1);
+      var el = id ? document.getElementById(id) : null;
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    if (/^(https?:)?\\/\\//i.test(href) || href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0){
+      a.target = '_blank';
+      a.rel = 'noopener';
+      return;
+    }
+    e.preventDefault();
+  }, true);
+
+  document.addEventListener('submit', function(e){
+    e.preventDefault();
+    console.log('📩 Form submit yahan demo mode mein disabled hai.');
+  }, true);
+})();
+` + '</scr' + 'ipt>';
+
 function buildOutput(langId, files){
   const L = getLang(langId);
   const BASE = '*{box-sizing:border-box}body{margin:0;padding:24px;font-family:system-ui,sans-serif;color:#1f2340;background:#fff;line-height:1.6}';
@@ -882,7 +917,7 @@ function buildOutput(langId, files){
   /* ---- Web Project (multi-file) ---- */
   if (L.type === 'multi'){
     return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>' + BASE + '\n' + (files.css || '') + '</style></head><body>' +
-      (files.html || '') + CONSOLE_HOOK +
+      (files.html || '') + CONSOLE_HOOK + NAV_GUARD +
       '<scr' + 'ipt>try{\n' + (files.js || '').replace(/<\/script>/gi, '<\\/script>') + '\n}catch(e){console.error("❌ " + e.message)}\n</scr' + 'ipt>' +
       '</body></html>';
   }
@@ -891,7 +926,7 @@ function buildOutput(langId, files){
 
   switch (L.lang){
     case 'html':
-      return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>' + BASE + '</style></head><body>' + code + CONSOLE_HOOK + '</body></html>';
+      return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>' + BASE + '</style></head><body>' + code + CONSOLE_HOOK + NAV_GUARD + '</body></html>';
 
     case 'css':
       return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>' + BASE + '\n' + code + '</style></head><body>' +
@@ -904,7 +939,7 @@ function buildOutput(langId, files){
 
     case 'js':
       return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>' + BASE + '</style></head><body>' +
-        '<div id="app"></div>' + CONSOLE_HOOK +
+        '<div id="app"></div>' + CONSOLE_HOOK + NAV_GUARD +
         '<scr' + 'ipt>try{\n' + code.replace(/<\/script>/gi, '<\\/script>') + '\n}catch(e){console.error("❌ " + e.message)}\n</scr' + 'ipt>' +
         '</body></html>';
 
