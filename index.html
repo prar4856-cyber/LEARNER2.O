@@ -174,7 +174,14 @@ input,textarea{font:inherit}
       <button id="btnLogout" class="btn danger sm" style="margin-left:4px">Logout</button>
     </div>
   </div>
-  <div class="dash-body" id="dashBody"></div>
+  <div class="dash-body" id="dashBody">
+    <div class="group" id="myProjectsGroup">
+      <div class="group-head"><h2>📁 Mere Projects</h2><span class="count" id="myProjectsCount">0</span><span class="line"></span></div>
+      <div class="cards" id="myProjectsCards"></div>
+      <div id="myProjectsEmpty" style="font-size:12.5px;color:#5d6689;padding:6px 2px 2px;line-height:1.5">Abhi tak koi project save nahi kiya hai. Editor kholo, code likho, phir <b>💾 Save As</b> dabao — phir wo yahin dikhega aur jab chaho wapas khol kar edit/dekh sakte ho.</div>
+    </div>
+    <div id="langGroups"></div>
+  </div>
 </section>
 
 <!-- ============ EDITOR ============ -->
@@ -184,6 +191,7 @@ input,textarea{font:inherit}
     <div class="title"><span class="ico" id="edIco">🚀</span><span id="edTitle">Project</span></div>
     <div class="spacer"></div>
     <span class="save-status" id="edSave">Saved</span>
+    <button id="edSaveAs" class="btn">💾 Save As</button>
     <button id="edShare" class="btn">🔗 Share</button>
     <button id="edRun" class="btn primary">▶ Run</button>
   </div>
@@ -252,6 +260,9 @@ function b64dec(str){
   str = str.replace(/-/g,'+').replace(/_/g,'/');
   while (str.length % 4) str += '=';
   return decodeURIComponent(escape(atob(str)));
+}
+function uid(){
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,9);
 }
 function withTimeout(p, ms, label){
   return Promise.race([
@@ -492,6 +503,75 @@ async function loadAllSaved(){
 }
 
 /* =========================================================
+   MERE PROJECTS — naam se save karke baad mein wapas kholna
+   (Multiple named saved projects, per-language slot se alag)
+   ========================================================= */
+function myProjectsKey(){
+  return isGuest ? 'cp_myprojects_local' : ('cp_myprojects_' + (currentUser?.id || 'u'));
+}
+function getLocalProjects(){
+  try { return JSON.parse(sGet(myProjectsKey()) || '[]'); } catch(e){ return []; }
+}
+function setLocalProjects(list){ sSet(myProjectsKey(), JSON.stringify(list)); }
+
+async function saveMyProject(proj){
+  const list = getLocalProjects();
+  const now = Date.now();
+  let rec = proj.id ? list.find(p => p.id === proj.id) : null;
+  if (!rec){
+    rec = { id: proj.id || uid(), name: proj.name, langId: proj.langId, files: proj.files, createdAt: now, updatedAt: now };
+    list.unshift(rec);
+  } else {
+    rec.name = proj.name || rec.name;
+    rec.files = proj.files;
+    rec.updatedAt = now;
+  }
+  setLocalProjects(list);
+
+  if (!isGuest && currentUser && supabase){
+    supabase.from('my_projects').upsert({
+      id: rec.id, user_id: currentUser.id, name: rec.name, lang_id: rec.langId,
+      files: rec.files, updated_at: new Date(now).toISOString()
+    }, { onConflict: 'id' }).then(() => {}, err => console.warn('Cloud project save:', err.message));
+  }
+  return rec;
+}
+
+async function deleteMyProject(id){
+  setLocalProjects(getLocalProjects().filter(p => p.id !== id));
+  if (!isGuest && currentUser && supabase){
+    supabase.from('my_projects').delete().eq('id', id).eq('user_id', currentUser.id)
+      .then(() => {}, err => console.warn('Cloud project delete:', err.message));
+  }
+}
+
+async function loadAllMyProjects(){
+  let local = getLocalProjects();
+  if (!isGuest && currentUser && supabase){
+    try {
+      const { data } = await withTimeout(
+        supabase.from('my_projects').select('id,name,lang_id,files,updated_at').eq('user_id', currentUser.id),
+        4000, 'Projects list'
+      );
+      if (data){
+        const map = {};
+        local.forEach(p => map[p.id] = p);
+        data.forEach(p => {
+          const cloudTs = new Date(p.updated_at).getTime();
+          const existing = map[p.id];
+          if (!existing || cloudTs > existing.updatedAt){
+            map[p.id] = { id: p.id, name: p.name, langId: p.lang_id, files: p.files, updatedAt: cloudTs, createdAt: existing?.createdAt || cloudTs };
+          }
+        });
+        local = Object.values(map);
+        setLocalProjects(local);
+      }
+    } catch(e){}
+  }
+  return local.sort((a,b) => b.updatedAt - a.updatedAt);
+}
+
+/* =========================================================
    DASHBOARD
    ========================================================= */
 function timeAgo(ts){
@@ -510,9 +590,52 @@ async function renderDash(){
 
   // Paint immediately
   paintDash({});
+  paintMyProjects([]);
 
   // Then load saved in background
   loadAllSaved().then(s => paintDash(s)).catch(() => {});
+  loadAllMyProjects().then(list => paintMyProjects(list)).catch(() => {});
+}
+
+function paintMyProjects(list){
+  $('myProjectsCount').textContent = list.length;
+  $('myProjectsEmpty').style.display = list.length ? 'none' : '';
+  const box = $('myProjectsCards');
+  box.innerHTML = list.map(p => {
+    const L = getLang(p.langId) || { icon:'📁', name:p.langId };
+    return '<div class="card" data-id="' + p.id + '" style="padding-bottom:54px">' +
+      '<div class="badge" style="background:#0d1f33;color:#79c0ff;border-color:#1e3a5f">SAVED</div>' +
+      '<div class="ico">' + L.icon + '</div>' +
+      '<div class="nm">' + esc(p.name) + '</div>' +
+      '<div class="ds">' + esc(L.name) + ' • ' + timeAgo(p.updatedAt) + '</div>' +
+      '<div style="position:absolute;bottom:10px;left:12px;right:12px;display:flex;gap:6px">' +
+        '<button class="btn sm ghost" data-act="share" style="flex:1">🔗 Share</button>' +
+        '<button class="btn sm danger" data-act="del" style="flex:1">🗑</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  box.querySelectorAll('.card').forEach(c => {
+    const id = c.dataset.id;
+    c.onclick = () => goTo('#/project/' + id);
+    const shareBtn = c.querySelector('[data-act="share"]');
+    const delBtn = c.querySelector('[data-act="del"]');
+    if (shareBtn) shareBtn.onclick = (e) => { e.stopPropagation(); shareMyProject(id); };
+    if (delBtn) delBtn.onclick = async (e) => {
+      e.stopPropagation();
+      if (!confirm('Ye project delete karna hai? Ye wapas nahi aayega.')) return;
+      await deleteMyProject(id);
+      toast('Project delete ho gaya');
+      renderDash();
+    };
+  });
+}
+
+async function shareMyProject(id){
+  const p = getLocalProjects().find(x => x.id === id);
+  if (!p) return toast('Project nahi mila', 'err');
+  const doc = buildOutput(p.langId, p.files);
+  await createAndCopyShareLink(doc);
 }
 
 function paintDash(saved){
@@ -543,8 +666,8 @@ function paintDash(saved){
     html += '</div></div>';
   });
 
-  $('dashBody').innerHTML = html;
-  $('dashBody').querySelectorAll('.card').forEach(c => {
+  $('langGroups').innerHTML = html;
+  $('langGroups').querySelectorAll('.card').forEach(c => {
     c.onclick = () => goTo('#/editor/' + c.dataset.lang);
   });
 }
@@ -552,7 +675,7 @@ function paintDash(saved){
 /* =========================================================
    EDITOR
    ========================================================= */
-let ed = { langId: null, files: {}, activeFile: null };
+let ed = { langId: null, files: {}, activeFile: null, projectId: null, projectName: null };
 let saveTimer = null;
 
 async function openEditor(langId){
@@ -562,6 +685,8 @@ async function openEditor(langId){
   ed.langId = langId;
   ed.files = JSON.parse(JSON.stringify(L.default));
   ed.activeFile = L.files ? L.files[0] : 'code';
+  ed.projectId = null;
+  ed.projectName = null;
 
   $('edIco').textContent = L.icon;
   $('edTitle').textContent = L.name;
@@ -588,6 +713,35 @@ async function openEditor(langId){
       $('edOut').srcdoc = buildOutput(langId, ed.files);
     }
   }).catch(() => {});
+}
+
+async function openMyProject(id){
+  let rec = getLocalProjects().find(p => p.id === id);
+  if (!rec){
+    const all = await loadAllMyProjects();
+    rec = all.find(p => p.id === id);
+  }
+  if (!rec){ toast('Project nahi mila', 'err'); goTo('#/dashboard'); return; }
+
+  const L = getLang(rec.langId) || getLang('web');
+  ed.langId = L.id;
+  ed.files = JSON.parse(JSON.stringify(rec.files || L.default));
+  ed.activeFile = L.files ? L.files[0] : 'code';
+  ed.projectId = rec.id;
+  ed.projectName = rec.name;
+
+  $('edIco').textContent = L.icon;
+  $('edTitle').textContent = rec.name;
+  $('edRun').style.display = '';
+
+  renderEdTabs();
+  $('edArea').value = ed.files[ed.activeFile] || '';
+  setSaveStatus('Saved', false);
+  $('edLogs').innerHTML = '';
+  addLog('sys', '📁 Project khula: ' + rec.name);
+
+  $('edOut').srcdoc = buildOutput(ed.langId, ed.files);
+  showView('view-editor');
 }
 
 function renderEdTabs(){
@@ -645,7 +799,23 @@ function saveNow(){
   if (!getLang(ed.langId)) return;
   ed.files[ed.activeFile] = $('edArea').value;
   saveProject(ed.langId, ed.files);
+  if (ed.projectId){
+    saveMyProject({ id: ed.projectId, name: ed.projectName, langId: ed.langId, files: ed.files });
+  }
   setSaveStatus('Saved ✓', true);
+}
+
+async function doSaveAs(){
+  ed.files[ed.activeFile] = $('edArea').value;
+  const L = getLang(ed.langId);
+  const defaultName = ed.projectName || (L ? L.name + ' Project' : 'Mera Project');
+  const name = prompt('Is project ka naam do (dobara save karne ke liye wahi naam rehne do):', defaultName);
+  if (!name || !name.trim()) return;
+  const rec = await saveMyProject({ id: ed.projectId, name: name.trim(), langId: ed.langId, files: ed.files });
+  ed.projectId = rec.id;
+  ed.projectName = rec.name;
+  $('edTitle').textContent = rec.name;
+  toast('💾 Project save ho gaya: "' + rec.name + '"', 'ok');
 }
 
 /* =========================================================
@@ -813,11 +983,42 @@ function buildOutput(langId, files){
 async function doShare(){
   ed.files[ed.activeFile] = $('edArea').value;
   saveNow();
-
   const doc = buildOutput(ed.langId, ed.files);
-  const url = location.href.split('#')[0] + '#preview=' + b64enc(doc);
+  await createAndCopyShareLink(doc);
+}
+
+/* Robust share link: pehle cloud (Supabase) mein doc save karke chota ?p=ID
+   wala link banate hai — ye login/session pe depend nahi karta aur
+   WhatsApp/Instagram jaise in-app browsers mein bhi kaam karta hai.
+   Agar cloud available nahi hai to purane #preview= wale link pe fallback. */
+async function createAndCopyShareLink(doc){
+  toast('🔗 Link banaya ja raha hai...', 'ok');
+  let url = null;
+
+  if (isSupabaseConfigured()){
+    try {
+      const client = await getSupabaseClient();
+      if (client){
+        const id = uid() + uid();
+        const { error } = await withTimeout(
+          client.from('shared_pages').insert({ id, doc }),
+          6000, 'Share upload'
+        );
+        if (!error){
+          url = location.href.split('#')[0].split('?')[0] + '?p=' + id;
+        } else {
+          console.warn('Cloud share failed, falling back:', error.message);
+        }
+      }
+    } catch(e){ console.warn('Cloud share:', e.message); }
+  }
+
+  if (!url){
+    url = location.href.split('#')[0].split('?')[0] + '#preview=' + b64enc(doc);
+  }
+
   await copy(url);
-  toast('🔗 Share link copied!', 'ok');
+  toast(url.indexOf('?p=') !== -1 ? '🔗 Link copied! (fully working, kahin bhi kholo)' : '🔗 Link copied (basic mode)', 'ok');
 }
 
 async function copy(text){
@@ -843,6 +1044,29 @@ function goTo(hash){
 }
 function route(){
   const hash = location.hash || '';
+  const shareId = new URLSearchParams(location.search || '').get('p');
+
+  // Cloud-backed share link — login/guest status se koi farak nahi padta,
+  // isliye ye check sabse pehle hota hai (login gate se bhi upar).
+  if (shareId){
+    $('pvFrame').srcdoc = '<div style="padding:40px;font-family:sans-serif;color:#667">Loading…</div>';
+    showView('view-preview');
+    (async () => {
+      let doc = null;
+      try {
+        const client = await getSupabaseClient();
+        if (client){
+          const { data } = await withTimeout(
+            client.from('shared_pages').select('doc').eq('id', shareId).maybeSingle(),
+            6000, 'Share load'
+          );
+          if (data?.doc) doc = data.doc;
+        }
+      } catch(e){}
+      $('pvFrame').srcdoc = doc || '<h1 style="padding:40px;font-family:sans-serif">⚠️ Link nahi mila ya expire ho gaya</h1>';
+    })();
+    return;
+  }
 
   if (hash.indexOf('#preview=') === 0){
     let doc = '';
@@ -857,6 +1081,9 @@ function route(){
     showView('view-login');
     return;
   }
+
+  const mp = hash.match(/^#\/project\/([a-zA-Z0-9_]+)/);
+  if (mp){ openMyProject(mp[1]); return; }
 
   const m = hash.match(/^#\/editor\/([a-zA-Z0-9_]+)/);
   if (m && getLang(m[1])){ openEditor(m[1]); return; }
@@ -882,6 +1109,7 @@ function wire(){
   $('edClear').onclick = clearLogs;
   $('edBack').onclick = () => { saveNow(); goTo('#/dashboard'); };
   $('edShare').onclick = doShare;
+  $('edSaveAs').onclick = doSaveAs;
 
   $('outFull').onclick = () => {
     ed.files[ed.activeFile] = $('edArea').value;
@@ -915,7 +1143,10 @@ function wire(){
     addLog(d.type === 'log' ? 'log' : d.type, d.args.join(' '));
   });
 
-  $('pvClose').onclick = () => goTo('');
+  $('pvClose').onclick = () => {
+    if (location.search){ try { history.replaceState(null, '', location.pathname); } catch(e){} }
+    goTo('');
+  };
   window.addEventListener('hashchange', route);
 }
 
